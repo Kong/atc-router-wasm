@@ -1,0 +1,20 @@
+[package]
+authors = ["Makito Yu <makito.yu@konghq.com>", "Kong Contributors"]
+description = """
+WebAssembly binding for ATC Router
+"""
+edition = "2021"
+name = "atc-router-wasm"
+repository = "https://github.com/Kong/atc-router-wasm"
+version = "1.2.0"
+
+[dependencies]
+atc-router = {version = "1.2.0", features = ["no-ffi", "serde"], git = "https://github.com/Kong/atc-router.git", branch = "feat/serde"}
+pest = "2.7.2"
+serde = {version = "1.0", features = ["derive"]}
+serde-wasm-bindgen = "0.4"
+uuid = "1.4"
+wasm-bindgen = "0.2"
+
+[lib]
+crate-type = ["cdylib"]

@@ -1,7 +1,7 @@
 [package]
 authors = ["Makito Yu <makito.yu@konghq.com>", "Kong Contributors"]
 description = """
-WebAssembly binding for ATC Router
+WebAssembly bindings for ATC Router
 """
 edition = "2021"
 name = "atc-router-wasm"

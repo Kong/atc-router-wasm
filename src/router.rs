@@ -20,7 +20,12 @@ impl Router {
     }
 
     #[wasm_bindgen(js_name = addMatcher)]
-    pub unsafe fn add_matcher(&mut self, priority: usize, uuid: &str, atc: &str) -> ExportedErrorMessage {
+    pub unsafe fn add_matcher(
+        &mut self,
+        priority: usize,
+        uuid: &str,
+        atc: &str,
+    ) -> ExportedErrorMessage {
         match (*self.r).add_matcher(priority, Uuid::from_str(uuid).unwrap_throw(), atc) {
             Ok(_) => JsValue::undefined(),
             Err(err) => err.into(),

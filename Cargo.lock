@@ -13,8 +13,9 @@ dependencies = [
 
 [[package]]
 name = "atc-router"
-version = "1.2.0"
-source = "git+https://github.com/Kong/atc-router.git?branch=feat/serde#7ee4832c813ead3ac4c1b579268f10bf2492670c"
+version = "1.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77fc04b37cc3aaba2be14aa75e2218b4fd99b5b52f9b00bcdecc8e3fd45c7cb9"
 dependencies = [
  "cidr",
  "lazy_static",
@@ -28,7 +29,7 @@ dependencies = [
 
 [[package]]
 name = "atc-router-wasm"
-version = "1.2.0"
+version = "1.3.1"
 dependencies = [
  "atc-router",
  "pest",

@@ -1,4 +1,4 @@
-.PHONY: all setup build publish clean
+.PHONY: all setup build publish example clean
 
 all: ;
 
@@ -15,8 +15,7 @@ publish:
 ifeq (, $(shell which npm))
 	$(error "npm not found in PATH, consider installing it via https://docs.npmjs.com/downloading-and-installing-node-js-and-npm")
 endif
-	cd pkg && \
-	npm publish --access public
+	cd pkg && npm publish --access public
 
 clean:
 	rm -rf pkg

@@ -9,10 +9,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { Parser } from '../pkg'
+import { computed, ref } from 'vue';
+import { Parser } from '../pkg';
 
-const expression = ref('')
+const expression = ref('a == 1 && b == 2')
 const parseResult = computed(() => Parser.parse(expression.value))
 </script>
 
@@ -22,9 +22,11 @@ const parseResult = computed(() => Parser.parse(expression.value))
   margin: 20px;
   text-align: left;
 }
+
 textarea {
   font-family: monospace;
 }
+
 pre {
   text-align: left;
 }

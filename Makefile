@@ -10,6 +10,8 @@ ifeq (, $(shell which wasm-pack))
 	$(error wasm-pack not found in PATH, consider installing it via "make setup")
 endif
 	wasm-pack build --scope kong --release --out-name atc-router
+	# rename the package to "@kong/atc-router": wasm-pack does not support this yet
+	sed -i '' -e 's#"name": "@kong/atc-router-wasm"#"name": "@kong/atc-router"#g' pkg/package.json
 
 publish:
 ifeq (, $(shell which npm))

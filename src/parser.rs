@@ -8,56 +8,52 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(typescript_custom_section)]
 const _INJECTED_TYPESCRIPT: &'static str = r#"
-export type ParserParseResult = {
+export interface ParserParseOk {
   ok: true;
   expressions: any;
-};
+}
 
-export type ParserParseError = {
+export interface ParserParseError {
   ok: false;
-  variant:
-    | {
-        parseError: {
-          message: string;
-        };
-      }
-    | {
-        customError: {
-          message: string;
-        };
-      };
-  location: { Pos: number } | { Span: [number, number] };
+  variant: { parsingError: string } | { customError: string };
+  location: { pos: number } | { span: [number, number] };
   lineCol:
-    | { Pos: [number, number] }
-    | { Span: [[number, number], [number, number]] };
-};
+    | { pos: [number, number] }
+    | { span: [[number, number], [number, number]] };
+}
+
+export type ParserParseResult = ParserParseOk | ParserParseError;
 "#;
 
 #[wasm_bindgen]
 extern "C" {
-    #[wasm_bindgen(typescript_type = "ParserParseResult | ParserParseError")]
+    #[wasm_bindgen(typescript_type = "ParserParseResult")]
     pub type ExportedParseResult;
 }
 
 #[derive(Serialize, Deserialize)]
 pub enum ErrorVariant {
     #[serde(rename(serialize = "parsingError"))]
-    ParsingError { message: String },
+    ParsingError(String),
     #[serde(rename(serialize = "customError"))]
-    CustomError { message: String },
+    CustomError(String),
 }
 
 #[derive(Serialize, Deserialize)]
 #[serde(remote = "PestInputLocation")]
 enum InputLocation {
+    #[serde(rename(serialize = "pos"))]
     Pos(usize),
+    #[serde(rename(serialize = "span"))]
     Span((usize, usize)),
 }
 
 #[derive(Serialize, Deserialize)]
 #[serde(remote = "PestLineColLocation")]
 enum LineColLocation {
+    #[serde(rename(serialize = "pos"))]
     Pos((usize, usize)),
+    #[serde(rename(serialize = "span"))]
     Span((usize, usize), (usize, usize)),
 }
 
@@ -71,6 +67,7 @@ pub struct ParseError {
     pub line_col: PestLineColLocation,
 }
 
+// Synthetic Result<T>
 #[derive(Serialize, Deserialize)]
 pub struct ParseResult {
     pub ok: bool,
@@ -95,12 +92,8 @@ impl Parser {
                     PestErrorVariant::ParsingError {
                         positives: _,
                         negatives: _,
-                    } => ErrorVariant::ParsingError {
-                        message: format!("{}", err.variant),
-                    },
-                    PestErrorVariant::CustomError { message } => {
-                        ErrorVariant::CustomError { message }
-                    }
+                    } => ErrorVariant::ParsingError(format!("{}", err.variant)),
+                    PestErrorVariant::CustomError { message } => ErrorVariant::CustomError(message),
                 },
                 location: err.location,
                 line_col: err.line_col,

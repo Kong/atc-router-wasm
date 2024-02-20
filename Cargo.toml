@@ -5,10 +5,10 @@ edition = "2021"
 exclude = ["/examples", "/pkg"]
 name = "atc-router-wasm"
 repository = "https://github.com/Kong/atc-router-wasm"
-version = "1.4.1"
+version = "1.6.0"
 
 [dependencies]
-atc-router = {version = "1.4.1", default-features = false, features = ["serde"]}
+atc-router = {version = "1.6.0", default-features = false, features = ["serde"]}
 pest = "2.7"
 serde = {version = "1.0", features = ["derive"]}
 serde-wasm-bindgen = "0.4"

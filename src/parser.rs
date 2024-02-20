@@ -1,4 +1,4 @@
-use atc_router::{ast::Expression, parser::parse};
+use atc_router::{ast::Expression, parser::parse, semantics::Validate};
 use pest::error::{
     ErrorVariant as PestErrorVariant, InputLocation as PestInputLocation,
     LineColLocation as PestLineColLocation,
@@ -6,29 +6,39 @@ use pest::error::{
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
+use crate::schema::Schema;
+
 #[wasm_bindgen(typescript_custom_section)]
 const _INJECTED_TYPESCRIPT: &'static str = r#"
-export interface ParserParseOk {
-  ok: true;
-  expressions: any;
+export interface ParseError {
+  variant: { parsingError: string } | { customError: string }
+  location: { pos: number } | { span: [number, number] }
+  lineCol: { pos: [number, number] } | { span: [[number, number], [number, number]] }
 }
 
-export interface ParserParseError {
-  ok: false;
-  variant: { parsingError: string } | { customError: string };
-  location: { pos: number } | { span: [number, number] };
-  lineCol:
-    | { pos: [number, number] }
-    | { span: [[number, number], [number, number]] };
+export interface ParseResultOk {
+  status: 'ok'
+  expression: any
 }
 
-export type ParserParseResult = ParserParseOk | ParserParseError;
+export interface ParseResultParseError {
+  status: 'parseError'
+  parseError: ParseError
+}
+
+export interface ParseResultValidationError {
+  status: 'validationError'
+  expression: any
+  validationError: string
+}
+
+export type ParseResult = ParseResultOk | ParseResultParseError | ParseResultValidationError
 "#;
 
 #[wasm_bindgen]
 extern "C" {
-    #[wasm_bindgen(typescript_type = "ParserParseResult")]
-    pub type ExportedParseResult;
+    #[wasm_bindgen(typescript_type = ParseResult)]
+    pub type ParseResult;
 }
 
 #[derive(Serialize, Deserialize)]
@@ -59,7 +69,6 @@ enum LineColLocation {
 
 #[derive(Serialize, Deserialize)]
 pub struct ParseError {
-    pub ok: bool,
     pub variant: ErrorVariant,
     #[serde(with = "InputLocation")]
     pub location: PestInputLocation,
@@ -67,11 +76,25 @@ pub struct ParseError {
     pub line_col: PestLineColLocation,
 }
 
-// Synthetic Result<T>
 #[derive(Serialize, Deserialize)]
-pub struct ParseResult {
-    pub ok: bool,
-    pub expressions: Expression,
+pub struct ParseResultOk {
+    pub status: &'static str,
+    pub expression: Expression,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ParseResultParseError {
+    pub status: &'static str,
+    #[serde(with = "ParseError", rename(serialize = "parseError"))]
+    pub parse_error: ParseError,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ParseResultValidationError {
+    pub status: &'static str,
+    pub expression: Expression,
+    #[serde(rename(serialize = "validationError"))]
+    pub validation_error: String,
 }
 
 #[wasm_bindgen]
@@ -80,26 +103,41 @@ pub struct Parser;
 #[wasm_bindgen]
 impl Parser {
     #[wasm_bindgen]
-    pub unsafe fn parse(expressions: &str) -> ExportedParseResult {
-        match parse(expressions) {
-            Ok(expressions) => serde_wasm_bindgen::to_value(&ParseResult {
-                ok: true,
-                expressions,
-            }),
-            Err(err) => serde_wasm_bindgen::to_value(&ParseError {
-                ok: false,
-                variant: match err.variant {
-                    PestErrorVariant::ParsingError {
-                        positives: _,
-                        negatives: _,
-                    } => ErrorVariant::ParsingError(format!("{}", err.variant)),
-                    PestErrorVariant::CustomError { message } => ErrorVariant::CustomError(message),
+    pub unsafe fn parse(expression: &str, schema: &Schema) -> ParseResult {
+        match parse(expression) {
+            Ok(expression) => match expression.validate(&*schema.s) {
+                Ok(_) => serde_wasm_bindgen::to_value(&ParseResultOk {
+                    status: "ok".into(),
+                    expression,
+                })
+                .unwrap_throw()
+                .into(),
+                Err(err) => serde_wasm_bindgen::to_value(&ParseResultValidationError {
+                    status: "validationError".into(),
+                    expression,
+                    validation_error: err.into(),
+                })
+                .unwrap_throw()
+                .into(),
+            },
+            Err(err) => serde_wasm_bindgen::to_value(&ParseResultParseError {
+                status: "parseError".into(),
+                parse_error: ParseError {
+                    variant: match err.variant {
+                        PestErrorVariant::ParsingError {
+                            positives: _,
+                            negatives: _,
+                        } => ErrorVariant::ParsingError(format!("{}", err.variant)),
+                        PestErrorVariant::CustomError { message } => {
+                            ErrorVariant::CustomError(message)
+                        }
+                    },
+                    location: err.location,
+                    line_col: err.line_col,
                 },
-                location: err.location,
-                line_col: err.line_col,
-            }),
+            })
+            .unwrap_throw()
+            .into(),
         }
-        .unwrap_throw()
-        .into()
     }
 }

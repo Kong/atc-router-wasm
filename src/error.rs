@@ -8,5 +8,5 @@ export type ErrorMessage = string | undefined;
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(typescript_type = ErrorMessage)]
-    pub type ExportedErrorMessage;
+    pub type JsOptionalErrorMessage;
 }

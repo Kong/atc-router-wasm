@@ -18,7 +18,7 @@ impl Context {
     }
 
     #[wasm_bindgen(js_name = addValue)]
-    pub unsafe fn add_value(&mut self, field: &str, value: ast::ExportedValue) {
+    pub unsafe fn add_value(&mut self, field: &str, value: ast::JsAstValue) {
         (*self.c).add_value(
             field,
             serde_wasm_bindgen::from_value(value.into()).unwrap_throw(),
@@ -26,8 +26,8 @@ impl Context {
     }
 
     #[wasm_bindgen(js_name = valueOf)]
-    pub unsafe fn value_of(&self, field: &str) -> ast::ExportedOptionValues {
-        ast::ExportedOptionValues::from(
+    pub unsafe fn value_of(&self, field: &str) -> ast::JsOptionalAstValues {
+        ast::JsOptionalAstValues::from(
             (*self.c)
                 .value_of(field)
                 .map_or(JsValue::undefined(), |values| {

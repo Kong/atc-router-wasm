@@ -1,4 +1,4 @@
-use crate::{context::Context, error::ExportedErrorMessage, schema::Schema};
+use crate::{context::Context, error::JsOptionalErrorMessage, schema::Schema};
 use atc_router::router::Router as AtcRouter;
 use std::str::FromStr;
 use uuid::Uuid;
@@ -25,7 +25,7 @@ impl Router {
         priority: usize,
         uuid: &str,
         atc: &str,
-    ) -> ExportedErrorMessage {
+    ) -> JsOptionalErrorMessage {
         match (*self.r).add_matcher(priority, Uuid::from_str(uuid).unwrap_throw(), atc) {
             Ok(_) => JsValue::undefined(),
             Err(err) => err.into(),

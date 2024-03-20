@@ -38,7 +38,7 @@ export type ParseResult = ParseResultOk | ParseResultParseError | ParseResultVal
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(typescript_type = ParseResult)]
-    pub type ParseResult;
+    pub type JsParseResult;
 }
 
 #[derive(Serialize, Deserialize)]
@@ -103,7 +103,7 @@ pub struct Parser;
 #[wasm_bindgen]
 impl Parser {
     #[wasm_bindgen]
-    pub unsafe fn parse(expression: &str, schema: &Schema) -> ParseResult {
+    pub unsafe fn parse(expression: &str, schema: &Schema) -> JsParseResult {
         match parse(expression) {
             Ok(expression) => match expression.validate(&*schema.s) {
                 Ok(_) => serde_wasm_bindgen::to_value(&ParseResultOk {

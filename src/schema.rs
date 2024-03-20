@@ -18,7 +18,7 @@ impl Schema {
     }
 
     #[wasm_bindgen(js_name = addField)]
-    pub unsafe fn add_field(&mut self, field: &str, typ: ast::ExportedType) {
+    pub unsafe fn add_field(&mut self, field: &str, typ: ast::JsAstType) {
         (*self.s).add_field(
             field,
             serde_wasm_bindgen::from_value(typ.into()).unwrap_throw(),
@@ -26,7 +26,7 @@ impl Schema {
     }
 
     #[wasm_bindgen(js_name = typeOf)]
-    pub unsafe fn type_of(&self, field: &str) -> ast::ExportedOptionType {
+    pub unsafe fn type_of(&self, field: &str) -> ast::JsOptionalAstType {
         (*self.s)
             .type_of(field)
             .map_or(JsValue::undefined(), |t| {

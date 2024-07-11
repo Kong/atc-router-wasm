@@ -4,7 +4,7 @@ WebAssembly bindings for Kong's [ATC Router library](https://github.com/Kong/atc
 
 ## Build
 
-1. Install wasm-pack via the [quick start](https://rustwasm.github.io/wasm-pack/book/quickstart.html) guide or ...
+1. Install wasm-pack via the [quick start](https://rustwasm.github.io/docs/wasm-pack/quickstart.html) guide or ...
    ```shell
    make setup
    ```

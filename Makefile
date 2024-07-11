@@ -11,7 +11,11 @@ ifeq (, $(shell which wasm-pack))
 endif
 	wasm-pack build --scope kong --release --out-name atc-router
 	# rename the package to "@kong/atc-router": wasm-pack does not support this yet
-	sed -i '' -e 's#"name": "@kong/atc-router-wasm"#"name": "@kong/atc-router"#g' pkg/package.json
+	@# Check the operating system and use appropriate sed command
+	@case "$$(uname -s)" in \
+	    Darwin*) sed -i '' -e 's#"name": "@kong/atc-router-wasm"#"name": "@kong/atc-router"#g' pkg/package.json ;; \
+	    *) sed -i -e 's#"name": "@kong/atc-router-wasm"#"name": "@kong/atc-router"#g' pkg/package.json ;; \
+	esac
 
 publish:
 ifeq (, $(shell which npm))
